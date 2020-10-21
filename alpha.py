@@ -43,7 +43,7 @@ logging.config.dictConfig({
     }
 })
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 class Alpha:
     def __init__(self):
