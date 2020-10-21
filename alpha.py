@@ -8,7 +8,6 @@ import sys
 from urllib.parse import urlencode
 
 
-
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 logging.config.dictConfig({
     'version': 1,
@@ -59,13 +58,13 @@ class Alpha:
 
         self.MCI = {"MCI": "get_mci_index", "GP": "get_gross_profit"}
 
-    def get_api_data(self, symbol, function)-> dict:
+    def get_api_data(self, symbol: str, function: str) -> dict:
         """
             Return data from the api call.
             Params:
                 symbol: The company symbol to extract data from.
 
-                function: The api funtion to be called.
+                function: The api function name to be called.
             
             Return:
         """
@@ -108,7 +107,7 @@ class Alpha:
         """
         return int(self.get_api_data(symbol, self.FUNCTIONS['Overview']).get('GrossProfitTTM', '0'))
 
-    def get_company_size(self, symbol, index_name:str)-> int:
+    def get_company_size(self, symbol: str, index_name: str) -> int:
         """
             The company size estimated by using one of the 2 indexes:
             'MCI' (default) or 'GP'
@@ -122,10 +121,10 @@ class Alpha:
         else:
             return self.get_mci_index(symbol)
         
-    def get_interval(self)->dict:
+    def get_interval(self) -> dict:
         return {'1': '1min', '5': '5min', '15': '15min', '30': '30min', '60': '60min'}
 
-    def get_symbols(self)-> dict:
+    def get_symbols(self) -> dict:
         """
             Return all Brazilian companies symbols available on 
             NYSE stock market.
@@ -179,7 +178,7 @@ class Alpha:
 
         return {'companies': [{'name':k, 'symbol':v} for k, v in symbols.items()]}
 
-    def get_n_biggest_brazilian_companies(self, n)-> list:
+    def get_n_biggest_brazilian_companies(self, n: int) -> list:
         """
             Return a list of tuples with the n biggest companies (name, symbol)
         """
@@ -190,7 +189,7 @@ class Alpha:
         logger.info(f'biggest companies: {ord_values}')
         return ord_values[:n]
 
-    def get_symbol_last_quote(self, symbol)-> dict:
+    def get_symbol_last_quote(self, symbol: str) -> dict:
         """
             Get data related to the last quote available from a company.
 
