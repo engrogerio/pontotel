@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+  <title>Pontotel</title>
+</head>
+
+<body>
+  <form class="px-4 py-3" method="post" action="/" id="Request">
+    <div class="form-group">
+      <h1>NYSE Brazilian papers - Pontotel</h1>
+    </div>
+    <div class="form-group">
+      <h2>{{ ibov }}</h2>
+    </div>
+    <div class="form-group">
+      <label for="value">To check the stock value of an specific Brazilian company, 
+        please, choose company name below and press <strong>Check stock value</strong> when ready. </p></label>
+      <select class="form-control" id="value" name="value" style="margin-bottom: 10px;">
+        <option>Please choose the company name.</option>
+        {% for company in biggest %}
+        <option value="{{ company[1] }}">{{ company[0] }}</option>
+        {% endfor %}
+      </select>
+
+      <button type="submit" id="restore" class="btn btn-primary">Check stock value</button>
+
+      <button class="btn btn-primary" id="loading" style="display:none;" type="button" disabled > 
+        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        Checking...
+      </button>
+
+    </div>
+
+      <div class="alert" role="alert" >
+        <div id="message"></div>
+      </div>
+         
+  </form>
+
+</body>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+  integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+  integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<script type="text/javascript">
+
+  $(document).ready(function () {
+
+    $("body").on("submit", "#Request", function (e) {
+      e.preventDefault();
+      $.ajax({
+        url: "/pontotel/show",
+        type: "POST",
+        data: $("#Request").serialize(),
+
+        success: function (result) {
+          if (result.success) {
+            $(".alert").addClass("alert alert-info");
+            $("#message").html(result.value);
+          }
+          else {
+            $(".alert").addClass("alert alert-danger");
+            $("#message").html("Item not found!");
+          }
+        },
+        error: function (xhr) {
+         console.log(xhr);
+        },
+        beforeSend: function () {
+          $("#restore").hide();
+          $("#loading").show();
+        },
+        complete: function () {
+          $("#restore").show();
+          $("#loading").hide();
+        }
+      });
+      return false;
+    });
+  });
+
+</script>
+
+</html>
