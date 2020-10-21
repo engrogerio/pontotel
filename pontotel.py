@@ -9,9 +9,6 @@ alpha = Alpha()
 
 @app.route('/pontotel',  methods=['GET'])
 def index():
-    """
-
-    """
     if request.method == 'GET':
         logger.info('Requesting ibov data.')
         ibov_points = f"Bovespa Index: {alpha.get_symbol_last_quote('IBOV11.SAO')['value']}"
