@@ -79,7 +79,7 @@ class Alpha:
         logger.debug(f'Response = {response.text}')
         return json.loads(response.text)
 
-    def get_mci_index(self, symbol: str) -> float:
+    def get_mci_index(self, symbol: str) -> int:
         """
             Market Capitalization index.
             Commonly referred to as "market cap," it is calculated
@@ -197,8 +197,8 @@ class Alpha:
                 symbol: The NYSE symbol for a specific company.
 
             Return:
-                Tuple (value, currency, date) for the last quote available
-                for parameter.
+                dictionary with value, currency and date values
+                for the last quote available for the passed parameter.
         """
 
         data = self.get_api_data(symbol, self.FUNCTIONS.get('Global quote')).get('Global Quote')
