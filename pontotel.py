@@ -14,7 +14,7 @@ def index():
         ibov_points = f"Bovespa Index: {alpha.get_symbol_last_quote('IBOV11.SAO')['value']}"
         logger.debug(f'Bovespa response: {ibov_points}')
         logger.info('Requesting biggest companies.')
-        biggest = alpha.get_n_biggest_brazilian_companies(10)
+        biggest = alpha.get_n_biggest_brazilian_companies(10,'MCI')
         logger.debug(f'Biggest companies {biggest}')
         try:
             return  render_template('index.html', ibov=ibov_points, biggest=biggest, success=None)

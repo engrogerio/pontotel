@@ -45,18 +45,24 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 class Alpha:
+    GLOBAL_QUOTE = 'GLOBAL_QUOTE'
+    TIME_SERIES_INTRADAY_EXTENDED = 'TIME_SERIES_INTRADAY_EXTENDED'
+    TIME_SERIES_DAILY = 'TIME_SERIES_DAILY'
+    TIME_SERIES_DAILY_ADJUSTED = 'TIME_SERIES_DAILY_ADJUSTED'
+    TIME_SERIES_WEEKLY = 'TIME_SERIES_WEEKLY'
+    TIME_SERIES_WEEKLY_ADJUSTED = 'TIME_SERIES_WEEKLY_ADJUSTED'
+    TIME_SERIES_MONTHLY = 'TIME_SERIES_MONTHLY'
+    OVERVIEW = 'OVERVIEW'
+    
     def __init__(self):
-        self.FUNCTIONS = {'Global quote': 'GLOBAL_QUOTE', 'Intraday extended': 'TIME_SERIES_INTRADAY_EXTENDED',
-                'Daily': 'TIME_SERIES_DAILY', 'Daily adjusted': 'TIME_SERIES_DAILY_ADJUSTED',
-                'Weekly': 'TIME_SERIES_WEEKLY', 'Weekly adjusted': 'TIME_SERIES_WEEKLY_ADJUSTED',
-                'Monthly': 'TIME_SERIES_MONTHLY', 'Overview': 'OVERVIEW'}
+
         try:
             self.apikey = os.environ['ALPHA_API_KEY']
+            self.has_prod_api = True
         except KeyError as ex:
             print('Missing environment variable "ALPHA_API_KEY"!\nDetails on https://www.alphavantage.co/support/#api-key\nUsing DEMO API KEY!')
+            self.has_prod_api = False
             self.apikey = '0S4J0EX4F61FJ0NJ'
-
-        self.MCI = {"MCI": "get_mci_index", "GP": "get_gross_profit"}
 
     def get_api_data(self, symbol: str, function: str) -> dict:
         """
@@ -92,7 +98,7 @@ class Alpha:
             Return:
                 A number that represents the index value.
         """
-        return int(self.get_api_data(symbol, self.FUNCTIONS['Overview']).get('MarketCapitalization', '0'))
+        return int(self.get_api_data(symbol, self.OVERVIEW).get('MarketCapitalization', '0'))
 
     def get_gross_profit(self, symbol: str) -> int:
         """
@@ -105,25 +111,25 @@ class Alpha:
             Return:
                 A number that represents the index value.
         """
-        return int(self.get_api_data(symbol, self.FUNCTIONS['Overview']).get('GrossProfitTTM', '0'))
+        return int(self.get_api_data(symbol, self.OVERVIEW).get('GrossProfitTTM', '0'))
 
-    def get_company_size(self, symbol: str, index_name: str) -> int:
+    def get_company_size(self, symbol: str, index: str) -> int:
         """
             The company size estimated by using one of the 2 indexes:
-            'MCI' (default) or 'GP'
+            MCI - Market Capitalization index (default) or GP - Gross profit
             Params:
+
                 symbol: The NYSE symbol for a specific company.
-                index_name: 'MCI' or 'GP' - The name of the index used 
+
+                index_name: 'MCI' or 'GP' - The name of the index used
                 for the company size calculation.
         """
-        if index_name == 'GP':
-            return self.get_gross_profit(symbol)
-        else:
+        if index == 'MCI': 
             return self.get_mci_index(symbol)
+        if index == 'GP':
+            return self.get_gross_profit(symbol)
+        return 0
         
-    def get_interval(self) -> dict:
-        return {'1': '1min', '5': '5min', '15': '15min', '30': '30min', '60': '60min'}
-
     def get_symbols(self) -> dict:
         """
             Return all Brazilian companies symbols available on 
@@ -132,8 +138,8 @@ class Alpha:
             could be used without a paid API KEY.
             
         """
-        
-        symbols =  {
+        if self.has_prod_api:
+            symbols =  {
                     'AMBEV S.A': 'ABEV',
                     'Azul': 'AZUL',
                     'Banco Bradesco': 'BBD',
@@ -164,8 +170,9 @@ class Alpha:
                     'Vale':	'VALE',
                     'XP Inc': 'XP'
                 }
-        # Using a small subset due to the API KEY restrictions
-        symbols = { 
+        # Using a small subset due to the free API key restrictions
+        else:
+            symbols = { 
                     'Petroleo Brasileiro-Petrobras': 'PBR',
                     'SABESP': 'SBS',
                     'Suzano S.A.': 'SUZ',
@@ -178,12 +185,20 @@ class Alpha:
 
         return {'companies': [{'name':k, 'symbol':v} for k, v in symbols.items()]}
 
-    def get_n_biggest_brazilian_companies(self, n: int) -> list:
+    def get_n_biggest_brazilian_companies(self, n: int, index: str) -> list:
         """
             Return a list of tuples with the n biggest companies (name, symbol)
+
+            Params:
+
+                n: Number of companies requested for the returning list
+
+                index: Name of the index used to calculate the company size:
+                "MCI" - Market Capitalization index or "GP" - Gross profit
         """
+
         symbols = self.get_symbols()['companies']
-        values = [(dic_item["name"], dic_item["symbol"], self.get_company_size(dic_item['symbol'], 'MCI')) for dic_item in symbols]
+        values = [(dic_item['name'], dic_item['symbol'], self.get_company_size(dic_item['symbol'], index)) for dic_item in symbols]
         
         ord_values = sorted(values, key=operator.itemgetter(2),reverse=True)
         logger.info(f'biggest companies: {ord_values}')
@@ -191,7 +206,8 @@ class Alpha:
 
     def get_symbol_last_quote(self, symbol: str) -> dict:
         """
-            Get data related to the last quote available from a company.
+            Get data related to the last quote available from a company
+        using GLOBAL_QUOTE API function call.
 
             Params:
                 symbol: The NYSE symbol for a specific company.
@@ -201,7 +217,7 @@ class Alpha:
                 for the last quote available for the passed parameter.
         """
 
-        data = self.get_api_data(symbol, self.FUNCTIONS.get('Global quote')).get('Global Quote')
+        data = self.get_api_data(symbol, self.GLOBAL_QUOTE).get('Global Quote') # API Returns a json with 'Global Quote' Key
         logger.debug(f'Getting company {symbol} values: {data}')
         
         try:
