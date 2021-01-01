@@ -1,6 +1,10 @@
+from pontotel.alpha_api import alpha
 import pytest
-import alpha
 from pytest import fixture
+import sys 
+
+
+print('file->', sys.argv[0], '> File->', __file__,' > name->', __name__, ' > package->', __package__)
 
 def fake_get_symbols():
     symbols = { 

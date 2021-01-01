@@ -4,7 +4,6 @@ import requests
 import json
 import operator
 import os
-import sys
 from urllib.parse import urlencode
 
 
@@ -45,6 +44,11 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 class Alpha:
+    """
+    Class that implement methods that consumes the alpha api services
+    and return the values for the interface.
+    
+    """
     GLOBAL_QUOTE = 'GLOBAL_QUOTE'
     TIME_SERIES_INTRADAY_EXTENDED = 'TIME_SERIES_INTRADAY_EXTENDED'
     TIME_SERIES_DAILY = 'TIME_SERIES_DAILY'
